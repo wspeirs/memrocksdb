@@ -3,9 +3,11 @@
 
 #include <string>
 #include <exception>
+#include <memory>
 
 using std::string;
 using std::exception;
+using std::shared_ptr;
 
 namespace MemcachedTextProtocol {
 class ParserException : public exception {
@@ -65,10 +67,17 @@ public:
     /**
      * Constructor that takes in the bytes of the payload
      */
-    Parser(const string &payload) throw(ParserException);
+    Parser(const shared_ptr<string> &payload) throw(ParserException);
 
 private:
-    string command;
+    const shared_ptr<string> &payload;
+    bool is_get;
+    string::size_type cmd_end;
+    string::size_type key_end;
+    string::size_type flags_end;
+    string::size_type exp_end;
+    string::size_type bytes_end;
+    string::size_type cmd_line_end;
 };
 
 }
