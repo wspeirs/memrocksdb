@@ -11,6 +11,14 @@ TEST(StorageCommandTests, ValidSet) {
     const shared_ptr<string> payload = make_shared<string>("set blah 3 0 11\r\nHello World\r\n");
 
     MemcachedTextProtocol::Parser parser(payload);
+
+    ASSERT_FALSE(parser.is_get());
+
+    ASSERT_EQ(parser.get_command(), "set");
+    ASSERT_EQ(parser.get_key(), "blah");
+    ASSERT_EQ(parser.get_flags(), "3");
+    ASSERT_EQ(parser.get_expiration(), 0);
+    ASSERT_EQ(parser.get_bytes(), 11);
 }
 
 TEST(StorageCommandTests, InValidSet) {

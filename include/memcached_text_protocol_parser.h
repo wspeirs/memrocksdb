@@ -4,10 +4,12 @@
 #include <string>
 #include <exception>
 #include <memory>
+#include <cstdint>
 
 using std::string;
 using std::exception;
 using std::shared_ptr;
+using std::stoi;
 
 namespace MemcachedTextProtocol {
 class ParserException : public exception {
@@ -69,9 +71,33 @@ public:
      */
     Parser(const shared_ptr<string> &payload) throw(ParserException);
 
+    inline bool is_get() const {
+        return _is_get;
+    }
+
+    inline string get_command() const {
+        return string(*payload, 0, cmd_end);
+    }
+
+    inline string get_key() const {
+        return string(*payload, cmd_end+1, key_end-cmd_end-1);
+    }
+
+    inline string get_flags() const {
+        return string(*payload, key_end+1, flags_end-key_end-1);
+    }
+
+    inline uint64_t get_expiration() const {
+        return stoi(string(*payload, flags_end+1, exp_end-flags_end-1), nullptr);
+    }
+
+    inline uint64_t get_bytes() const {
+        return stoi(string(*payload, exp_end+1, bytes_end-exp_end-1), nullptr);
+    }
+
 private:
     const shared_ptr<string> &payload;
-    bool is_get;
+    bool _is_get;
     string::size_type cmd_end;
     string::size_type key_end;
     string::size_type flags_end;
