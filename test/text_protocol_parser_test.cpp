@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "memcached_text_protocol_parser.h"
+#include "text_protocol_parser.h"
 
 #include <memory>
 
