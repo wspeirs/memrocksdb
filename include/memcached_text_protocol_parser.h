@@ -1,15 +1,17 @@
 #ifndef MEMCACHED_TEXT_PROTOCOL_PARSER_H
 #define MEMCACHED_TEXT_PROTOCOL_PARSER_H
 
-#include <string>
+#include <cstdint>
 #include <exception>
 #include <memory>
-#include <cstdint>
+#include <string>
+#include <vector>
 
-using std::string;
 using std::exception;
 using std::shared_ptr;
 using std::stoi;
+using std::string;
+using std::vector;
 
 namespace MemcachedTextProtocol {
 class ParserException : public exception {
@@ -39,6 +41,8 @@ public:
         case SERVER_ERROR:
             response = "SERVER_ERROR ";
             break;
+        default:
+            response = "UNKNOWN";            
         }
 
         response += reason;
@@ -103,9 +107,15 @@ public:
         return string(*payload, cmd_line_end+1, get_byte_count());
     }
 
+    inline vector<string> get_keys() const {
+        return _get_keys;
+    }
+
 private:
     const shared_ptr<string> &payload;
     bool _is_get;
+    vector<string> _get_keys;
+
     string::size_type cmd_end;
     string::size_type key_end;
     string::size_type flags_end;

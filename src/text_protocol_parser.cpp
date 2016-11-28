@@ -1,5 +1,13 @@
 #include "memcached_text_protocol_parser.h"
 
+#include <algorithm>
+#include <iterator>
+#include <sstream>
+
+using std::istringstream;
+using std::istream_iterator;
+using std::copy;
+
 MemcachedTextProtocol::Parser::Parser(const shared_ptr<string> &payload) throw(ParserException)
     : payload(payload) {
     // search for the command
@@ -12,13 +20,19 @@ MemcachedTextProtocol::Parser::Parser(const shared_ptr<string> &payload) throw(P
     // for now only supporting set, add, and get
     if(payload->compare(0, cmd_end, "set") != 0 &&
        payload->compare(0, cmd_end, "add") != 0 &&
-       payload->compare(0, cmd_end, "get")) {
+       payload->compare(0, cmd_end, "get") != 0 &&
+       payload->compare(0, cmd_end, "gets")) {
         throw ParserException(ParserException::ErrorType::SERVER_ERROR, "Only set, get, and add are supported");
     }
 
     // check to see if we're handling a get command
-    if(payload->compare(0, cmd_end, "get") == 0) {
+    if(payload->compare(0, cmd_end, "get") == 0 || payload->compare(0, cmd_end, "gets") == 0) {
         _is_get = true;
+
+        istringstream iss(string(*payload, cmd_end+1));
+
+        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter(_get_keys));
+
         return;
     }
     

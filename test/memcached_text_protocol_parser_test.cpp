@@ -7,7 +7,7 @@
 using std::make_shared;
 
 
-TEST(StorageCommandTests, DISABLED_ValidSetWithoutNoReply) {
+TEST(StorageCommandTests, ValidSetWithoutNoReply) {
     const shared_ptr<string> payload = make_shared<string>("set blah 3 0 11\r\nHello World\r\n");
 
     MemcachedTextProtocol::Parser parser(payload);
@@ -39,6 +39,46 @@ TEST(StorageCommandTests, ValidSetWithNoReply) {
     ASSERT_EQ(parser.get_value(), "Hello World");
 }
 
+TEST(StorageCommandTests, ValidGetOneKey) {
+    const shared_ptr<string> payload = make_shared<string>("get blah\r\n");
+
+    MemcachedTextProtocol::Parser parser(payload);
+
+    ASSERT_TRUE(parser.is_get());
+
+    ASSERT_EQ(parser.get_keys(), vector<string>({"blah"}));
+}
+
+TEST(StorageCommandTests, ValidGetMultipleKey) {
+    const shared_ptr<string> payload = make_shared<string>("get foo bar blah\r\n");
+
+    MemcachedTextProtocol::Parser parser(payload);
+
+    ASSERT_TRUE(parser.is_get());
+
+    ASSERT_EQ(parser.get_keys(), vector<string>({"foo", "bar", "blah"}));
+}
+
+TEST(StorageCommandTests, ValidGetsOneKey) {
+    const shared_ptr<string> payload = make_shared<string>("gets blah\r\n");
+
+    MemcachedTextProtocol::Parser parser(payload);
+
+    ASSERT_TRUE(parser.is_get());
+
+    ASSERT_EQ(parser.get_keys(), vector<string>({"blah"}));
+}
+
+TEST(StorageCommandTests, ValidGetsMultipleKey) {
+    const shared_ptr<string> payload = make_shared<string>("gets foo bar blah\r\n");
+
+    MemcachedTextProtocol::Parser parser(payload);
+
+    ASSERT_TRUE(parser.is_get());
+
+    ASSERT_EQ(parser.get_keys(), vector<string>({"foo", "bar", "blah"}));
+}
+
 TEST(StorageCommandTests, InValidSet) {
     const shared_ptr<string> payload = make_shared<string>("set\r\n");
 
@@ -47,5 +87,6 @@ TEST(StorageCommandTests, InValidSet) {
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
+
     return RUN_ALL_TESTS();
 }
