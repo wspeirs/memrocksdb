@@ -37,12 +37,19 @@ MemcachedTextProtocol::Parser::Parser(const shared_ptr<string> &payload) throw(P
         throw ParserException(ParserException::ErrorType::SERVER_ERROR, "Couldn't find expiration time");
     }
 
-    if(string::npos == (bytes_end = payload->find(' ', exp_end+1))) {
+    if(string::npos == (bytes_end = payload->find_first_of(" \r", exp_end+1))) {
         throw ParserException(ParserException::ErrorType::SERVER_ERROR, "Couldn't find bytes");
     }
 
-    if(string::npos == (cmd_line_end = payload->find("\r\n", bytes_end+1))) {
-        throw ParserException(ParserException::ErrorType::SERVER_ERROR, "Couldn't find bytes");
+    cmd_line_end = payload->find('\n', bytes_end+1);
+
+    // optional noreply token
+    if((*payload)[bytes_end] == ' ') {
+        noreply = true;
+    }
+
+    if(string::npos == cmd_line_end || payload->size() == cmd_line_end) {
+        throw ParserException(ParserException::ErrorType::SERVER_ERROR, "Couldn't find value");
     }
 }
 

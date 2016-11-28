@@ -91,8 +91,16 @@ public:
         return stoi(string(*payload, flags_end+1, exp_end-flags_end-1), nullptr);
     }
 
-    inline uint64_t get_bytes() const {
+    inline uint64_t get_byte_count() const {
         return stoi(string(*payload, exp_end+1, bytes_end-exp_end-1), nullptr);
+    }
+
+    inline bool no_reply() const {
+        return noreply;
+    }
+
+    inline string get_value() const {
+        return string(*payload, cmd_line_end+1, get_byte_count());
     }
 
 private:
@@ -103,6 +111,7 @@ private:
     string::size_type flags_end;
     string::size_type exp_end;
     string::size_type bytes_end;
+    bool noreply = false;
     string::size_type cmd_line_end;
 };
 
